@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quiz_app/data/questions.dart';
 import 'package:quiz_app/question_screen.dart';
+import 'package:quiz_app/result_screen.dart';
 
 import 'package:quiz_app/start_screen.dart';
 
@@ -17,7 +18,7 @@ class _QuizState extends State<Quiz> {
   Widget? activeScreen;
 
   //var activeScreen = "start-screen";
-  final List<String> selectedAnswers = [];
+  List<String> selectedAnswers = [];
 
   @override
   void initState() {
@@ -25,11 +26,21 @@ class _QuizState extends State<Quiz> {
     super.initState();
   }
 
+  void resetQuiz() {
+    setState(() {
+      selectedAnswers = [];
+      activeScreen = StartScreen(switchScreen);
+    });
+  }
+
   void chooseAnswer(String answer) {
     selectedAnswers.add(answer);
     if (selectedAnswers.length == questions.length) {
       setState(() {
-        activeScreen = StartScreen(switchScreen);
+        activeScreen = ResultScreen(
+          choosenAnswer: selectedAnswers,
+          onResetQuiz: resetQuiz,
+        );
       });
     }
   }
@@ -53,8 +64,8 @@ class _QuizState extends State<Quiz> {
         body: Container(
             decoration: const BoxDecoration(
               gradient: (LinearGradient(colors: [
-                Color.fromRGBO(103, 2, 110, 1),
-                Color.fromRGBO(217, 81, 227, 1)
+                Color.fromRGBO(62, 3, 66, 1),
+                Color.fromRGBO(107, 1, 114, 1)
               ])),
             ),
             child: activeScreen),

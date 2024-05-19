@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -22,7 +24,7 @@ void main() {
                 ),
               ),
               const Text(
-                "Hello",
+                "Learn Flutter",
                 style: TextStyle(fontSize: 28, color: Colors.white),
               ),
               Padding(
@@ -31,6 +33,9 @@ void main() {
                   onPressed: () {},
                   icon: const Icon(Icons.arrow_right),
                   label: const Text("Start Quiz"),
+                  style: ElevatedButton.styleFrom(
+                      foregroundColor: const Color.fromARGB(255, 248, 246, 246),
+                      backgroundColor: const Color.fromARGB(255, 68, 1, 70)),
                 ),
               )
             ],

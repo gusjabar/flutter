@@ -29,15 +29,23 @@ class _QuizState extends State<Quiz> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-          decoration: const BoxDecoration(
-            gradient: (LinearGradient(colors: [
-              Color.fromRGBO(103, 2, 110, 1),
-              Color.fromRGBO(217, 81, 227, 1)
-            ])),
-          ),
-          child: activeScreen),
+    //alternative way to change the screen.
+    // Widget screenWidget = StartScreen(switchScreen);
+    // if (activeScreen == 'questions-screen') {
+    //   screenWidget = const QuestionScreen();
+    // }
+
+    return MaterialApp(
+      home: Scaffold(
+        body: Container(
+            decoration: const BoxDecoration(
+              gradient: (LinearGradient(colors: [
+                Color.fromRGBO(103, 2, 110, 1),
+                Color.fromRGBO(217, 81, 227, 1)
+              ])),
+            ),
+            child: activeScreen),
+      ),
     );
   }
 }

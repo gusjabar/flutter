@@ -2,7 +2,9 @@ import 'package:expense_tracker/models/expense.dart';
 import 'package:flutter/material.dart';
 
 class NewExpense extends StatefulWidget {
-  const NewExpense({super.key});
+  const NewExpense({super.key, required this.onAddExpense});
+
+  final void Function(Expense) onAddExpense;
 
   @override
   State<StatefulWidget> createState() {
@@ -25,6 +27,37 @@ class _NewExpense extends State<NewExpense> {
     setState(() {
       _selectedDate = pickedDate;
     });
+  }
+
+  void _submitExpenseData() {
+    final enteredAmount = double.tryParse(_amountController.text);
+    final amountIsInvalid = enteredAmount == null || enteredAmount <= 0;
+
+    if (_titleController.text.isEmpty ||
+        amountIsInvalid ||
+        _selectedCategory == null ||
+        _selectedDate == null) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Validation Result'),
+          content: const Text('Invalid input'),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Okay'))
+          ],
+        ),
+      );
+      return;
+    }
+    widget.onAddExpense(
+      Expense(
+          title: _titleController.text,
+          amount: enteredAmount,
+          category: _selectedCategory!,
+          date: _selectedDate!),
+    );
   }
 
   @override
@@ -142,7 +175,7 @@ class _NewExpense extends State<NewExpense> {
                 child: const Text('Cancel'),
               ),
               ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () => _submitExpenseData(),
                 icon: const Icon(
                   Icons.save,
                   size: 24.0,

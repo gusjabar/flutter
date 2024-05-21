@@ -14,6 +14,8 @@ class _NewExpense extends State<NewExpense> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   DateTime? _selectedDate;
+  Category? _selectedCategory;
+
 //future is a async/await function.
   void _presenterDatePicker() async {
     final now = DateTime.now();
@@ -44,7 +46,7 @@ class _NewExpense extends State<NewExpense> {
           ),
           TextField(
             controller: _titleController,
-            maxLength: 50,
+            maxLength: 100,
             decoration: const InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(
@@ -60,7 +62,7 @@ class _NewExpense extends State<NewExpense> {
                 children: [
                   const Text('Amount'),
                   SizedBox(
-                    width: 100,
+                    width: 150,
                     child: TextField(
                       controller: _amountController,
                       keyboardType:
@@ -100,8 +102,41 @@ class _NewExpense extends State<NewExpense> {
               ),
             ],
           ),
+          const SizedBox(
+            height: 10,
+          ),
           Row(
             children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Selected Categroy'),
+                  DropdownButton(
+                      value: _selectedCategory,
+                      items: Category.values
+                          .map(
+                            (e) => DropdownMenuItem(
+                              value: e,
+                              child: Row(
+                                children: [
+                                  Icon(categoriesIcon[e]),
+                                  const SizedBox(width: 8),
+                                  Text(e.name.toUpperCase())
+                                ],
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setState(() {
+                          _selectedCategory = value;
+                        });
+                      }),
+                ],
+              ),
+              const Spacer(),
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: const Text('Cancel'),

@@ -58,6 +58,8 @@ class _NewExpense extends State<NewExpense> {
           category: _selectedCategory!,
           date: _selectedDate!),
     );
+    //display the popup fill out all the screen.
+    Navigator.pop(context);
   }
 
   @override
@@ -70,7 +72,7 @@ class _NewExpense extends State<NewExpense> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.fromLTRB(15, 45, 15, 15),
       child: Column(
         children: [
           const Align(

@@ -1,5 +1,8 @@
+import 'dart:ffi';
+
 import 'package:expense_tracker/models/expense.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 class NewExpense extends StatefulWidget {
   const NewExpense({super.key, required this.onAddExpense});
@@ -62,24 +65,16 @@ class _NewExpense extends State<NewExpense> {
     Navigator.pop(context);
   }
 
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _amountController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(15, 45, 15, 15),
-      child: Column(
-        children: [
-          const Align(
-            alignment: Alignment.bottomLeft,
-            child: Text('Title'),
-          ),
-          TextField(
+  Widget getTitleWidget() {
+    return Column(
+      children: [
+        const Align(
+          alignment: Alignment.bottomLeft,
+          child: Text('Title'),
+        ),
+        SizedBox(
+          width: 400,
+          child: TextField(
             controller: _titleController,
             maxLength: 100,
             decoration: const InputDecoration(
@@ -90,104 +85,183 @@ class _NewExpense extends State<NewExpense> {
               ),
             ),
           ),
-          Row(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Amount'),
-                  SizedBox(
-                    width: 150,
-                    child: TextField(
-                      controller: _amountController,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(
-                        prefixText: '\$',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(5),
-                          ),
-                        ),
-                      ),
+        ),
+      ],
+    );
+  }
+
+  Widget getAmountWidget() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Amount'),
+        SizedBox(
+          width: 150,
+          child: TextField(
+            controller: _amountController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: const InputDecoration(
+              prefixText: '\$',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(5),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget getDateTimeWidget() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        const Text('Selected Date'),
+        Row(
+          children: [
+            Text(
+              _selectedDate == null
+                  ? 'No Date Selected'
+                  : formatter.format(_selectedDate!),
+            ),
+            IconButton(
+              onPressed: () => _presenterDatePicker(),
+              icon: const Icon(Icons.calendar_month),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget getCategoryWidget() {
+    return Column(
+      children: [
+        const Text('Selected Categroy'),
+        DropdownButton(
+            value: _selectedCategory,
+            items: Category.values
+                .map(
+                  (e) => DropdownMenuItem(
+                    value: e,
+                    child: Row(
+                      children: [
+                        Icon(categoriesIcon[e]),
+                        const SizedBox(width: 8),
+                        Text(e.name.toUpperCase())
+                      ],
                     ),
                   ),
-                ],
-              ),
-              const Spacer(),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const Text('Selected Date'),
-                  Row(
-                    children: [
-                      Text(
-                        _selectedDate == null
-                            ? 'No Date Selected'
-                            : formatter.format(_selectedDate!),
-                      ),
-                      IconButton(
-                        onPressed: () => _presenterDatePicker(),
-                        icon: const Icon(Icons.calendar_month),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Row(
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Selected Categroy'),
-                  DropdownButton(
-                      value: _selectedCategory,
-                      items: Category.values
-                          .map(
-                            (e) => DropdownMenuItem(
-                              value: e,
-                              child: Row(
-                                children: [
-                                  Icon(categoriesIcon[e]),
-                                  const SizedBox(width: 8),
-                                  Text(e.name.toUpperCase())
-                                ],
-                              ),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        if (value == null) return;
-                        setState(() {
-                          _selectedCategory = value;
-                        });
-                      }),
-                ],
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton.icon(
-                onPressed: () => _submitExpenseData(),
-                icon: const Icon(
-                  Icons.save,
-                  size: 24.0,
-                ),
-                label: const Text('Save'),
-              ),
-            ],
-          )
-        ],
-      ),
+                )
+                .toList(),
+            onChanged: (value) {
+              if (value == null) return;
+              setState(() {
+                _selectedCategory = value;
+              });
+            })
+      ],
     );
+  }
+
+  Widget getCommnadsButtonWidget() {
+    return Row(
+      children: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton.icon(
+          onPressed: () => _submitExpenseData(),
+          icon: const Icon(
+            Icons.save,
+            size: 24.0,
+          ),
+          label: const Text('Save'),
+        )
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _amountController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var keyboardSpace = MediaQuery.of(context)
+        .viewInsets
+        .bottom; //avoid keyword overlaping with user controls.
+
+    return LayoutBuilder(builder: (ctx, constraints) {
+      final width = constraints.maxWidth; //availabel width
+      //care about the parent widget
+
+      return SizedBox(
+        height: double.infinity,
+        width: double.infinity,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(15, 45, 15, 15 + keyboardSpace),
+            child: Column(
+              children: [
+                if (width >= 600)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      //Title
+                      getTitleWidget(),
+                      const Spacer(),
+                      //Amount
+                      getAmountWidget(),
+                    ],
+                  )
+                else
+                  //Title
+                  getTitleWidget(),
+                Row(
+                  children: [
+                    if (width < 600)
+                      //Amount
+                      getAmountWidget(),
+                    if (width >= 600)
+                      //Category list
+                      getCategoryWidget(),
+                    const Spacer(),
+                    //Date
+                    getDateTimeWidget(),
+                  ],
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  children: [
+                    if (width < 600)
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          //Category list
+                          getCategoryWidget(),
+                        ],
+                      ),
+                    const Spacer(),
+                    //Buttons
+                    getCommnadsButtonWidget(),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+    });
   }
 }

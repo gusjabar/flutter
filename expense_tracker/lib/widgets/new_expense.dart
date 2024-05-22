@@ -1,8 +1,8 @@
-import 'dart:ffi';
+import 'dart:io';
 
 import 'package:expense_tracker/models/expense.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/cupertino.dart'; //to use native iOS look and feel controls
 
 class NewExpense extends StatefulWidget {
   const NewExpense({super.key, required this.onAddExpense});
@@ -32,6 +32,42 @@ class _NewExpense extends State<NewExpense> {
     });
   }
 
+  void _showDialog() {
+    //show dialog more looking as native app.
+    if (Platform.isIOS) {
+      showCupertinoDialog(
+        context: context,
+        builder: (ctx) => CupertinoAlertDialog(
+          title: const Text('Invalid Input'),
+          content: const Text(
+              'Please make sure a valid title, amount, date and category was entered.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+              },
+              child: const Text('Okay'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Validation Result'),
+          content: const Text('Invalid input'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Okay'),
+            )
+          ],
+        ),
+      );
+    }
+  }
+
   void _submitExpenseData() {
     final enteredAmount = double.tryParse(_amountController.text);
     final amountIsInvalid = enteredAmount == null || enteredAmount <= 0;
@@ -40,18 +76,7 @@ class _NewExpense extends State<NewExpense> {
         amountIsInvalid ||
         _selectedCategory == null ||
         _selectedDate == null) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: const Text('Validation Result'),
-          content: const Text('Invalid input'),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Okay'))
-          ],
-        ),
-      );
+      _showDialog();
       return;
     }
     widget.onAddExpense(

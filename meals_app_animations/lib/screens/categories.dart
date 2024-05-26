@@ -29,7 +29,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         vsync: this,
         lowerBound: 0,
         upperBound: 1,
-        duration: const Duration(milliseconds: 300));
+        duration: const Duration(milliseconds: 400));
     _animationController.forward(); //activate the animation
   }
 
@@ -72,11 +72,21 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             )
         ],
       ),
-      builder: (context, child) => Padding(
-        padding: EdgeInsetsDirectional.only(
-            top: 100 - _animationController.value * 100),
-        child:
-            child, //optimization, is part the animation but shouldn't be rebuild.
+      // builder: (context, child) => Padding(
+      //   padding: EdgeInsetsDirectional.only(
+      //       top: 100 - _animationController.value * 100),
+      //   child:
+      //       child, //optimization, is part the animation but shouldn't be rebuild.
+      // ),
+      builder: (context, child) => SlideTransition(
+        //this method to animate is optimize than the previous one.
+        position: Tween(
+          begin: const Offset(0, 0.3),
+          end: const Offset(0, 0),
+        ).animate(
+          CurvedAnimation(parent: _animationController, curve: Curves.ease),
+        ),
+        child: child,
       ),
     );
   }

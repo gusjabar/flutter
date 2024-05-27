@@ -17,9 +17,6 @@ class _GroceryListState extends State<GroceryList> {
 
   late Future<List<GroceryItem>> _loadedItems;
 
-  bool _isLoading = true;
-  String? _errorMessage;
-
   Future<List<GroceryItem>> _loadItems() async {
     final List<GroceryItem> tempList = [];
     final url = Uri.https(

@@ -12,6 +12,9 @@ class Places {
   final PlaceLocation placeLocation;
 
   Places(
-      {required this.title, required this.image, required this.placeLocation})
-      : id = uuid.v4();
+      {required this.title,
+      required this.image,
+      required this.placeLocation,
+      String? id})
+      : id = id ?? uuid.v4();
 }

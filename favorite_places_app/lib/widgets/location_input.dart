@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:favorite_places_app/models/place_location.dart';
+import 'package:favorite_places_app/screens/map.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
 
@@ -26,7 +28,24 @@ class _LocationInputState extends State<LocationInput> {
     final lat = _selectedLocation!.latitude;
     final log = _selectedLocation!.longitude;
 //ref:https://developers.google.com/maps/documentation/maps-static/overview
-    return 'https://maps.googleapis.com/maps/api/staticmap?center=$lat,$log&zoom=16&size=600x300&maptype=roadmap&markers=color:blue%7Clabel:S%7C$lat,$log&key=AIzaSyBpMdZp8DBlkULbKX50q4Cub4Pf45dgWJA';
+    return 'https://maps.googleapis.com/maps/api/staticmap?center=$lat,$log&zoom=16&size=600x300&maptype=roadmap&markers=color:red%7Clabel:P%7C$lat,$log&key=AIzaSyBpMdZp8DBlkULbKX50q4Cub4Pf45dgWJA';
+  }
+
+  Future<void> _savePlace(double latitude, double longitude) async {
+//ref:https://developers.google.com/maps/documentation/geocoding/requests-reverse-geocoding
+    final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=$latitude,$longitude&key=AIzaSyBpMdZp8DBlkULbKX50q4Cub4Pf45dgWJA');
+
+    var response = await http.get(url);
+    var geocoding = json.decode(response.body);
+    final address = geocoding['results'][0]['formatted_address'];
+
+    setState(() {
+      isGettingLocation = false;
+      _selectedLocation = PlaceLocation(
+          latitude: latitude, longitude: longitude, address: address);
+    });
+    widget.onSelectedLocation(_selectedLocation!);
   }
 
   void _getCurrentLocatin() async {
@@ -63,22 +82,19 @@ class _LocationInputState extends State<LocationInput> {
         return;
       });
     }
-//ref:https://developers.google.com/maps/documentation/geocoding/requests-reverse-geocoding
-    final url = Uri.parse(
-        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${locationData.latitude},${locationData.longitude}&key=AIzaSyBpMdZp8DBlkULbKX50q4Cub4Pf45dgWJA');
+    _savePlace(locationData.latitude!, locationData.longitude!);
+  }
 
-    var response = await http.get(url);
-    var geocoding = json.decode(response.body);
-    final address = geocoding['results'][0]['formatted_address'];
-
-    setState(() {
-      isGettingLocation = false;
-      _selectedLocation = PlaceLocation(
-          latitude: locationData.latitude!,
-          longitude: locationData.longitude!,
-          address: address);
-    });
-    widget.onSelectedLocation(_selectedLocation!);
+  void _selectOnMap() async {
+    final pickedLocation = await Navigator.of(context).push<LatLng>(
+      MaterialPageRoute(
+        builder: (ctx) => const MapScreen(),
+      ),
+    );
+    if (pickedLocation == null) {
+      return;
+    }
+    _savePlace(pickedLocation.latitude, pickedLocation.longitude);
   }
 
   @override
@@ -129,7 +145,7 @@ class _LocationInputState extends State<LocationInput> {
             ),
             TextButton.icon(
               icon: const Icon(Icons.map),
-              onPressed: () {},
+              onPressed: _selectOnMap,
               label: const Text('Select on Map'),
             ),
           ],

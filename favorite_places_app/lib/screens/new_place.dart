@@ -41,43 +41,38 @@ class _NewPlaceState extends ConsumerState<NewPlaceScreen> {
       appBar: AppBar(
         title: const Text('Add New Place'),
       ),
-      body: Column(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              children: [
-                TextField(
-                  decoration: const InputDecoration(labelText: 'Title'),
-                  controller: _titleController,
-                  style:
-                      TextStyle(color: Theme.of(context).colorScheme.onSurface),
-                ),
-                ImageInput(
-                  onSelectedImage: (File image) {
-                    _selectedImage = image;
-                  },
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                LocationInput(
-                  onSelectedLocation: (location) {
-                    _location = location;
-                  },
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                ElevatedButton.icon(
-                  onPressed: _savePlace,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Place'),
-                )
-              ],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            TextField(
+              decoration: const InputDecoration(labelText: 'Title'),
+              controller: _titleController,
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
             ),
-          ),
-        ],
+            ImageInput(
+              onSelectedImage: (File image) {
+                _selectedImage = image;
+              },
+            ),
+            const SizedBox(
+              height: 12,
+            ),
+            LocationInput(
+              onSelectedLocation: (location) {
+                _location = location;
+              },
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            ElevatedButton.icon(
+              onPressed: _savePlace,
+              icon: const Icon(Icons.add),
+              label: const Text('Add Place'),
+            )
+          ],
+        ),
       ),
     );
   }

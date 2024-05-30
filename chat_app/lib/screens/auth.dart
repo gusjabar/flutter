@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:chat_app/widgets/user_image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -17,12 +21,15 @@ class _AuthScreenState extends State<AuthScreen> {
   var _enteredEmail = '';
   var _enteredPassword = '';
   var _isLogin = true;
+  File? _selectedImage;
 
   void _submit() async {
     final isValid = _form.currentState!.validate();
-    if (!isValid) {
+    if (!isValid || !_isLogin && _selectedImage == null) {
+      //showing error msg.
       return;
     }
+
     _form.currentState!.save();
 
     try {
@@ -33,9 +40,21 @@ class _AuthScreenState extends State<AuthScreen> {
       } else {
         userCredentials = await _firebase.createUserWithEmailAndPassword(
             email: _enteredEmail, password: _enteredPassword);
+
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('user_images')
+            .child('${userCredentials.user!.uid}.jpg');
+        await storageRef.putFile(_selectedImage!);
+        final imageUrl = await storageRef.getDownloadURL();
       }
     } on FirebaseAuthException catch (error) {
-      if (error.code == 'emai-already-in-use') {}
+      if (error.code == 'emai-already-in-use') {
+        //....
+      }
+      if (!context.mounted) {
+        return;
+      }
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -70,6 +89,12 @@ class _AuthScreenState extends State<AuthScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          if (!_isLogin)
+                            UserImagePicker(
+                              onPickImage: (pickedImage) {
+                                _selectedImage = pickedImage;
+                              },
+                            ),
                           TextFormField(
                             decoration: const InputDecoration(
                               labelText: 'Email Address',

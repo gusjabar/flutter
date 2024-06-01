@@ -1,8 +1,34 @@
+import 'package:chat_app/widgets/chat_messages.dart';
+import 'package:chat_app/widgets/new_message.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
-class ChatScreen extends StatelessWidget {
+class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
+
+  @override
+  State<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
+  void setupPushNotifications() async {
+    final fcm = FirebaseMessaging.instance;
+    await fcm.requestPermission();
+
+    //address of the device o which your app is running and it's this adrrress which you would need to target this specific device
+    // and you can send this address with an HTTP request to your backend and store it in a database to connect it to other metadata of you user. For example.
+    //for testing https://console.firebase.google.com/project/flutter-chat-app-b45ef/messaging/onboarding
+    // final token = await fcm.getToken();
+    //print(token);
+    fcm.subscribeToTopic('chat');
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    setupPushNotifications(); //don't use await here in initstate
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +45,14 @@ class ChatScreen extends StatelessWidget {
           )
         ],
       ),
-      body: const Text('Hello Chat'),
+      body: const Column(
+        children: [
+          Expanded(
+            child: ChatMessages(),
+          ),
+          NewMessage(),
+        ],
+      ),
     );
   }
 }
